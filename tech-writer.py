@@ -1,13 +1,17 @@
-# 
-# Create a Streamlit front end to Ollama 
-# to implement a simple spelling and grammar check use case
-# Use a customized Llama2 model with a specialized system prompt to
-# support this use case.   That model is called 'tech-writer'
+# tech-writer
 #
-# requirements:  requests, streamlit
+# @Author: clvgt12
+# @URL:  https://github.com/clvgt12/tech-writer
+# @License: MIT
+#
+# Implement a simple spelling and grammar check use case
+# Use a customized Llama2 model with a specialized system prompt.   
+# That model is called 'tech-writer'
+#
+# LLM requirements:  install Ollama with tech-writer LLM created
+# pip requirements:  requests, streamlit
 #
 # invoke this application as:  streamlit run tech-writer.py
-#
 
 import os
 import json
