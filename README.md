@@ -7,7 +7,7 @@ The app is designed to correct spelling and grammar errors, improve clarity, and
 ## Installation Instructions
 ### Prerequisites
 - Python 3.8 or later
-- Ollama, installed natively on your host computer
+- Ollama, installed on your host computer
 ### Python and Required Modules Installation
 #### Windows
 1. Download and install Python from [python.org](https://www.python.org/downloads/windows/).
