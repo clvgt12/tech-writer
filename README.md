@@ -1,6 +1,6 @@
 # Tech Writer App
 ## Introduction
-This application provides a simple interface for checking grammar and spelling in text inputs. It leverages the powerful Llama2 open source large language model for processing and correcting text, making it ideal for professionals seeking to enhance their written communication.
+This application provides a simple interface for checking grammar and spelling in text inputs. It leverages your choice of a open source large language model for processing and correcting text, making it ideal for professionals seeking to enhance their written communication.
 The Tech Writer communicates with [Ollama](https://ollama.ai), an open source LLM runtime environment that provides a standardized API interface for various open source models.
 ## Use Case
 The app is designed to correct spelling and grammar errors, improve clarity, and enhance the conciseness of professional communication. It's particularly useful for writers, editors, content creators, and anyone who values precision in written English.
