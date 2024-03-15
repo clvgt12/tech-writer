@@ -2,7 +2,7 @@
 # To build a new Modelfile based on this one, replace the FROM line with:
 # FROM gemma:7b
 
-FROM /root/.ollama/models/blobs/sha256:456402914e838a953e0cf80caa6adbe75383d9e63584a964f504a7bbb8f7aad9
+FROM gemma:7b
 TEMPLATE """<start_of_turn>user
 {{ if .System }}{{ .System }} {{ end }}{{ .Prompt }}<end_of_turn>
 <start_of_turn>model
