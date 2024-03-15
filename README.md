@@ -22,10 +22,10 @@ $ pip install streamlit requests
 $ pip3 install streamlit requests
 ```
 ### Ollama Model Setup
-**Note:** The following installation instructions assume the use of Ollama that is installed natively on Windows, MocOS and Linux systems.  The following instructions do not assume the use of the Ollama Docker container, or invoking it within the Windows Subsystem for Linux. 
+**Note:** The following installation instructions assume the use of Ollama that is installed on Windows, MocOS and Linux systems.   
 
 After you install [Ollama](https://github.com/ollama/ollama), proceed with the following instructions.
-#### Windows, MacOS and Linux (native Ollama installation)
+#### Windows, MacOS and Linux
 1. Pull the Google Gemma LLM using Ollama CLI:
 ```
 $ ollama pull model gemma:7b
@@ -38,7 +38,7 @@ $ ollama create tech-writer --file tech-writer.Modelfile
 #### Windows, Linux and MacOS
 From the command line, run:
 ```
-$ streamlit run tech-writer.py --server.address=0.0.0.0
+$ streamlit run tech-writer.py
 ```
 ## Usage
 After launching the application, simply enter the text you wish to check in the provided text area and click "Check Syntax." 
