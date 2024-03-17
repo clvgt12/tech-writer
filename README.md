@@ -1,4 +1,7 @@
 # Tech Writer App
+
+![](./images/tech-writer-header-image-dalle3.jpg "Source: Dall-E 3: Image of a AI robot, typing at a computer, presumably writing a blog post article, and wanting an application to help it write more clearly, concisely and effectively")
+
 ## Introduction
 This application provides a simple interface for checking grammar and spelling in text inputs. It leverages your choice of a open source large language model for processing and correcting text, making it ideal for professionals seeking to enhance their written communication.
 The Tech Writer communicates with [Ollama](https://ollama.ai), an open source LLM runtime environment that provides a standardized API interface for various open source models.
