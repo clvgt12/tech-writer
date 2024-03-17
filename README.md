@@ -28,7 +28,7 @@ $ pip install streamlit requests
 $ pip3 install streamlit requests
 ```
 ### Ollama Model Setup
-**Note:** The following installation instructions assume the use of Ollama that is installed on Windows, MocOS and Linux systems.   
+**Note:** The following installation instructions assume the use of Ollama that is installed on Windows, MacOS and Linux systems.   
 
 After you install [Ollama](https://github.com/ollama/ollama), proceed with the following instructions.
 #### Windows, MacOS and Linux
