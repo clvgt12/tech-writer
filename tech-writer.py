@@ -97,7 +97,6 @@ def front_end():
             accumulated_text = ""
             for part in query_ollama(text):
                 if part:
-                    time.sleep(0.1)
                     accumulated_text += part
                     output_placeholder.markdown(accumulated_text)
                 else:
