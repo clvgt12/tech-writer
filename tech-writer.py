@@ -111,6 +111,7 @@ def front_end():
     st.markdown('<style>div.row-widget.stTextArea { padding-top: 0.5rem; }</style>', unsafe_allow_html=True)
     text = st.text_area("Enter text to check:", height=150)
     if st.button('Check Syntax'):
+        st.markdown('<style>h2 { font-size: 1.2rem; }</style>', unsafe_allow_html=True)
         if text:
             output_placeholder = st.empty()
             accumulated_text = ""
