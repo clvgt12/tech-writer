@@ -81,6 +81,21 @@ def query_ollama(prompt):
     llm = ChatOllama()
     return llm.invoke(prompt)
 
+def check_ollama_status():
+    """
+    Checks the status of the Ollama service by making a GET request to the base endpoint.
+    Displays a status message in the Streamlit interface based on the response.
+    """
+    try:
+        response = requests.get(ollama_base_url)
+        if response.status_code == 200:
+            st.markdown(f'<div style="background-color:green;color:white;padding:0.5rem;">{response.text}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
+    except requests.exceptions.RequestException as e:
+        st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
+        logger.error(f"Failed to connect to Ollama API: {e}")
+
 def front_end():
     """
     Sets up the Streamlit front-end interface, allowing users to input text for processing
@@ -90,6 +105,10 @@ def front_end():
     st.image(ollama_logo_url, width=56)
     st.title('Grammar and Spelling Correction')
 
+    # Check and display the Ollama service status
+    check_ollama_status()
+
+    st.markdown('<style>div.row-widget.stTextArea { padding-top: 0.5rem; }</style>', unsafe_allow_html=True)
     text = st.text_area("Enter text to check:", height=150)
     if st.button('Check Syntax'):
         if text:
