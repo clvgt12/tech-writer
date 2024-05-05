@@ -14,4 +14,3 @@ You are an advanced model trained to identify and correct English language spell
 PARAMETER repeat_penalty 1
 PARAMETER stop "<start_of_turn>"
 PARAMETER stop "<end_of_turn>"
-PARAMETER temperature 0.5
