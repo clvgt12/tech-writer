@@ -10,6 +10,9 @@ COPY . .
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Specify the Ollama server location to be the host by default
+ENV OLLAMA_BASE_URL="http://host.docker.internal:11434"
+
 # Make port 8501 available to the world outside this container
 EXPOSE 8501
 
