@@ -79,7 +79,9 @@ def query_ollama(prompt):
     :return: Streamed responses from the model or an error message.
     """
     llm = ChatOllama()
-    return llm.invoke(prompt)
+    system_prompt = """You are an advanced model trained to identify and correct English language spelling and grammar errors while enhancing the clarity and conciseness of professional communication. Please review the text provided below, correct any errors, revise the content for professional clarity and conciseness without altering the original meaning.  Respond back to this prompt with two sections.  The first section shall shall be titled Revised Text:, and contain your revised text.  The second section shall be titled Corrections:, and contain an bulletized list highlighting the corrections you made. If you cannot make corrections to the provided text, just say the provided text is grammatically correct. Finally, please emit your response in markdown format so it can be streamed inside a web application. From a styling perspective, when you generate the section headers, use level two markup, e.g., ## Revised Text:, ## Corrections:. """
+    full_prompt = f"{system_prompt}\n\n{prompt}"  # Combine system and user prompts
+    return llm.invoke(full_prompt)
 
 def check_ollama_status():
     """
