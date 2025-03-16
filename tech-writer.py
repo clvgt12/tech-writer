@@ -64,16 +64,22 @@ def check_ollama_status():
     """
     Checks the status of the Ollama service by issuing an ollama ps status API call.
     Displays a status message in the Streamlit interface based on the response.
+    :return Bool (to control streamlit objects)
     """
+    status = True
     try:
         response = ollama.ps()
         st.markdown(f'<div style="background-color:green;color:white;padding:0.5rem;">Ollama is available.</div>', unsafe_allow_html=True)
+        status = False
+        return status
     except ollama.ResponseError as e:
         st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
         logger.error(f"Failed to connect to Ollama server: {e}")
+        return status
     except Exception as e:
         st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
         logger.error(f"Failed to check Ollama status: {e}")
+        return status
 
 def query_ollama(config: dict, prompt: str, st: object):
     """
@@ -111,11 +117,11 @@ def front_end():
     st.title('Grammar and Spelling Correction')
 
     # Check and display the Ollama service status
-    check_ollama_status()
+    ollama_state = check_ollama_status()
 
     st.markdown('<style>div.row-widget.stTextArea { padding-top: 0.5rem; }</style>', unsafe_allow_html=True)
-    text = st.text_area("Enter text to check:", height=150)
-    if st.button('Check Syntax'):
+    text = st.text_area("Enter text to check:", height=150, disabled=ollama_state)
+    if st.button('Check Syntax', disabled=ollama_state):
         st.markdown('<style>h2 { font-size: 1.2rem; }</style>', unsafe_allow_html=True)
         if text:
             query_ollama(config, text, st)
