@@ -12,20 +12,17 @@ The app is designed to correct spelling and grammar errors, improve clarity, and
 
 ## Installation Instructions
 ### Prerequisites
-- Python 3.12 or later
-- Ollama, installed on your host computer, along with your choice of LLM
-### Python and Required Modules Installation
+#### Ollama
+1. Install [Ollama](https://ollama.ai) on your host PC
+2. Pull the default LLM `ollama pull llama3.2:1b` (you can use other models; change the name in the `prompts.yaml` file)
+### Python Base Installation
 #### Windows
-1. Download and install Python from [python.org](https://www.python.org/downloads/windows/).
-2. Install Streamlit and other required modules:
-```
-$ pip install streamlit requests
-```
+- Download and install Python from [python.org](https://www.python.org/downloads/windows/).
 #### Linux/MacOS
-1. Python is typically pre-installed on Linux and macOS. If not, install Python using your distribution's package manager (Linux) or download from [python.org](https://www.python.org/downloads/macos/) (macOS).
-2. Install Streamlit and other required modules:
+- Python is typically pre-installed on Linux and macOS. If not, install Python using your distribution's package manager (Linux) or download from [python.org](https://www.python.org/downloads/macos/) (macOS).
+### Python Library Module Installation
 ```
-$ pip3 install streamlit requests
+$ pip3 install -r requirements.txt
 ```
 ## Running the Application
 #### Windows, Linux and MacOS

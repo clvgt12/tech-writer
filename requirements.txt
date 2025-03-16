@@ -1,6 +1,6 @@
 #
 # Requirements for pip
 #
-requests
 streamlit
-python-dotenv
+PyYAML
+ollama
