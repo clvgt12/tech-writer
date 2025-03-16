@@ -124,11 +124,10 @@ def query_ollama(config: dict, prompt: str, st: object):
     accumulated_text = ""
     try:
         for part in ollama.chat(model=config['model'], messages=messages, stream=True):
-            if part['message']['content']:  # Access content from part
-                accumulated_text += part['message']['content']
+            p = part['message']['content'] # Access content from part
+            if p and p != "":  
+                accumulated_text += p
                 output_placeholder.markdown(accumulated_text)
-            else:
-                st.warning("Ollama returned an empty content part.")  # Use warning instead of error for partial responses
     except ollama.ResponseError as e:
         st.error(f"query_ollama(): {e}")
     except Exception as e:
