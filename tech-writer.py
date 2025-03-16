@@ -8,7 +8,7 @@ import ollama
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)  # Configure basic logging
 
-def load_config_file(filepath_list: list[str]) -> dict:
+def load_config(filepath_list: list[str]) -> dict:
     """
     Slogan: Merges configuration from environment, YAML, and defaults. (order of precedence)
     Parameters:
@@ -58,6 +58,8 @@ def load_config_file(filepath_list: list[str]) -> dict:
     config = set_defaults()
     config = load_yaml_file(config, filepath_list)
     config = load_env(config)
+    logger.info(f"load_config(): OLLAMA_HOST={config['host']}")
+    logger.info(f"load_config(): MODEL_NAME={config['model']}")
     return config
 
 def check_ollama_status():
@@ -74,12 +76,37 @@ def check_ollama_status():
         return status
     except ollama.ResponseError as e:
         st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
-        logger.error(f"Failed to connect to Ollama server: {e}")
+        logger.error(f"check_ollama_status(): {e}")
         return status
     except Exception as e:
         st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
-        logger.error(f"Failed to check Ollama status: {e}")
+        logger.error(f"check_ollama_status(): {e}")
         return status
+
+def check_model_status(model: str) -> str:
+    """
+    Checks the availability of the requested model on the Ollama server.
+    If the requested model is available on the server, then return the same
+    If it is not available, return the first model name on the list, and use that one for the session
+    :param model: string containing requested model name
+    :return: string: the model name to be used for this session
+    """
+    try:
+        response: ollama.ListResponse = ollama.list()
+        model_names = [m.model for m in response.models]  # Extract model names
+        logger.info(f"check_model_status(): Available model(s): {model_names}")
+        if model not in model_names:
+            if model_names:  # Check if the list is not empty
+                logger.warning(f"check_model_status(): User specified model {model} not available")
+                logger.warning(f"check_model_status(): Using {model_names[0]} for this session")
+                model = model_names[0]
+        return model
+    except ollama.ResponseError as e:
+        logger.error(f"check_model_status(): Error from Ollama: {e}")
+        return model
+    except Exception as e:
+        logger.error(f"check_model_status(): An unexpected error occurred: {e}")
+        return model
 
 def query_ollama(config: dict, prompt: str, st: object):
     """
@@ -103,25 +130,29 @@ def query_ollama(config: dict, prompt: str, st: object):
             else:
                 st.warning("Ollama returned an empty content part.")  # Use warning instead of error for partial responses
     except ollama.ResponseError as e:
-        st.error(f"Error from Ollama: {e}")
+        st.error(f"query_ollama(): {e}")
     except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+        st.error(f"query_ollama(): {e}")
 
-def front_end():
+def front_end(config: dict) -> None:
     """
     Sets up the Streamlit front-end interface, allowing users to input text for processing
     by the Ollama model and displays the results.
+    :param config: Dictionary containing configuration, including 'model' and 'system'.
+    :return: None (enters event loop).
     """
     ollama_logo_url = os.getenv('OLLAMA_LOGO_URL', 'https://ollama.com/public/ollama.png')
     st.image(ollama_logo_url, width=56)
     st.title('Grammar and Spelling Correction')
 
     # Check and display the Ollama service status
-    ollama_state = check_ollama_status()
+    ollama_disabled_state = check_ollama_status()
+    if not ollama_disabled_state:  # If ollama_disabled_state is False, then check model
+        config['model'] = check_model_status(config['model'])
 
     st.markdown('<style>div.row-widget.stTextArea { padding-top: 0.5rem; }</style>', unsafe_allow_html=True)
-    text = st.text_area("Enter text to check:", height=150, disabled=ollama_state)
-    if st.button('Check Syntax', disabled=ollama_state):
+    text = st.text_area("Enter text to check:", height=150, disabled=ollama_disabled_state)
+    if st.button('Check Syntax', disabled=ollama_disabled_state):
         st.markdown('<style>h2 { font-size: 1.2rem; }</style>', unsafe_allow_html=True)
         if text:
             query_ollama(config, text, st)
@@ -129,8 +160,8 @@ def front_end():
             st.error("Please enter some text to check.")
 
 if __name__ == "__main__":
-    config = load_config_file(['/etc/tech-writer/prompts.yaml', './prompts.yaml'])
+    config = load_config(['/etc/tech-writer/prompts.yaml', './prompts.yaml'])
     if config is None:
-        logger.error('Can not locate prompts.yaml config file')
+        logger.error('main(): Can not locate prompts.yaml config file')
         exit()  # Corrected exit call
-    front_end()
+    front_end(config)
