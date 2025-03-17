@@ -1,4 +1,5 @@
 import os
+import time
 import yaml
 import streamlit as st
 import logging
@@ -32,12 +33,13 @@ def load_config(filepath_list: list[str]) -> dict:
             try:
                 with open(filename, "r") as f:
                     yaml_config = yaml.safe_load(f) or {}
+                    logging.info(f"merge_config(): Loaded prompts file '{filename}'")
             except FileNotFoundError:
-                logging.warning(f"[WARNING merge_config()]: Could not load prompts file '{filename}'")
+                logging.warning(f"merge_config(): Prompts file '{filename}' does not exist")
             except yaml.YAMLError as e:
-                logging.error(f"[ERROR merge_config()]: YAML error in '{filename}': {e}")
+                logging.error(f"merge_config(): YAML error in '{filename}': {e}")
             except Exception as e:
-                logging.error(f"[ERROR merge_config()]: Unexpected error loading '{filename}': {e}")
+                logging.error(f"merge_config(): Unexpected error: {e}")
         # Extract values from YAML file (if available)
         config['host'] = yaml_config.get("host", config['host'])
         config['model'] = yaml_config.get("model", config['model'])
@@ -110,28 +112,39 @@ def check_model_status(model: str) -> str:
 
 def query_ollama(config: dict, prompt: str, st: object):
     """
-    Sends a prompt to the Ollama container and retrieves the streamed response.
+    Sends a prompt to the Ollama container and retrieves the streamed response,
+    calculating tokens per second.
     :param config: Dictionary containing configuration, including 'model' and 'system'.
     :param prompt: Text prompt to be corrected or processed by the model.
     :param st: Streamlit object for displaying output.
     :return: None (displays streamed responses in Streamlit).
     """
-    messages = [  # messages should be a list of dictionaries
+    messages = [
         {"role": "system", "content": config['system']},
         {"role": "user", "content": prompt},
     ]
     output_placeholder = st.empty()
     accumulated_text = ""
+    token_count = 0
+    start_time = time.time()
     try:
         for part in ollama.chat(model=config['model'], messages=messages, stream=True):
-            p = part['message']['content'] # Access content from part
-            if p and p != "":  
+            p = part['message']['content']
+            if p and p != "":
                 accumulated_text += p
                 output_placeholder.markdown(accumulated_text)
+                token_count += 1  # Increment token count
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        if elapsed_time > 0:
+            tokens_per_second = token_count / elapsed_time
+            logger.info(f"query_ollama(): Tokens per second: {tokens_per_second:.2f}")
+        else:
+            logger.info("query_ollama(): Tokens per second: N/A")
     except ollama.ResponseError as e:
-        st.error(f"query_ollama(): {e}")
+        logger.error(f"query_ollama(): {e}")
     except Exception as e:
-        st.error(f"query_ollama(): {e}")
+        logger.error(f"query_ollama(): {e}")
 
 def front_end(config: dict) -> None:
     """
