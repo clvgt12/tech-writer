@@ -33,13 +33,13 @@ def load_config(filepath_list: list[str]) -> dict:
             try:
                 with open(filename, "r") as f:
                     yaml_config = yaml.safe_load(f) or {}
-                    logging.info(f"merge_config(): Loaded prompts file '{filename}'")
+                    logging.info(f"load_yaml_file(): Loaded prompts file '{filename}'")
             except FileNotFoundError:
-                logging.warning(f"merge_config(): Prompts file '{filename}' does not exist")
+                logging.warning(f"load_yaml_file(): Prompts file '{filename}' does not exist")
             except yaml.YAMLError as e:
-                logging.error(f"merge_config(): YAML error in '{filename}': {e}")
+                logging.error(f"load_yaml_file(): YAML error in '{filename}': {e}")
             except Exception as e:
-                logging.error(f"merge_config(): Unexpected error: {e}")
+                logging.error(f"load_yaml_file(): Unexpected error: {e}")
         # Extract values from YAML file (if available)
         config['host'] = yaml_config.get("host", config['host'])
         config['model'] = yaml_config.get("model", config['model'])
@@ -129,18 +129,23 @@ def query_ollama(config: dict, prompt: str, st: object) -> None:
     start_time = time.time()
     try:
         for part in ollama.chat(model=config['model'], messages=messages, stream=True):
+            if token_count == 0:
+                ramp_up_time = time.time() - start_time
+                if ramp_up_time > 0:
+                    logger.info(f"query_ollama(): ramp up time = {ramp_up_time:.2f} seconds")
+                else:
+                    logger.warning("query_ollama(): ramp up time is zero.")
             p = part['message']['content']
             if p and p != "":
                 accumulated_text += p
                 output_placeholder.markdown(accumulated_text)
                 token_count += 1  # Increment token count
-        end_time = time.time()
-        elapsed_time = end_time - start_time
+        elapsed_time = time.time() - start_time
         if elapsed_time > 0:
             tokens_per_second = token_count / elapsed_time
-            logger.info(f"query_ollama(): Tokens per second: {tokens_per_second:.2f}")
+            logger.info(f"query_ollama(): tokens per second = {tokens_per_second:.2f}")
         else:
-            logger.info("query_ollama(): Tokens per second: N/A")
+            logger.warning("query_ollama(): Elapsed time is zero.")
     except ollama.ResponseError as e:
         logger.error(f"query_ollama(): {e}")
     except Exception as e:
