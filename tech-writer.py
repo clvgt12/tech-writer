@@ -64,11 +64,11 @@ def load_config(filepath_list: list[str]) -> dict:
     logger.info(f"load_config(): MODEL_NAME={config['model']}")
     return config
 
-def check_ollama_status():
+def check_ollama_status() -> bool:
     """
     Checks the status of the Ollama service by issuing an ollama ps status API call.
     Displays a status message in the Streamlit interface based on the response.
-    :return Bool (to control streamlit objects)
+    :return: bool (to control streamlit objects)
     """
     status = True
     try:
@@ -110,7 +110,7 @@ def check_model_status(model: str) -> str:
         logger.error(f"check_model_status(): An unexpected error occurred: {e}")
         return model
 
-def query_ollama(config: dict, prompt: str, st: object):
+def query_ollama(config: dict, prompt: str, st: object) -> None:
     """
     Sends a prompt to the Ollama container and retrieves the streamed response,
     calculating tokens per second.
