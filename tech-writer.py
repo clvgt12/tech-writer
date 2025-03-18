@@ -64,44 +64,70 @@ def load_config(filepath_list: list[str]) -> dict:
     logger.info(f"load_config(): MODEL_NAME={config['model']}")
     return config
 
+def set_ollama_status_banner(st: object, ollama_disabled_state: bool) -> None:
+    """
+    Displays correct banner based on ollama_disabled_state
+    Parameters:
+        st: obj: The streamlit object
+        ollama_disabled_state: bool: True if ollama is NOT available, False if it is
+    Returns:
+        None
+    """
+    if ollama_disabled_state:
+        st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div style="background-color:green;color:white;padding:0.5rem;">Ollama is available.</div>', unsafe_allow_html=True)
+
+
 def check_ollama_status() -> bool:
     """
     Checks the status of the Ollama service by issuing an ollama ps status API call.
-    Displays a status message in the Streamlit interface based on the response.
     :return: bool (to control streamlit objects)
     """
     status = True
     try:
         response = ollama.ps()
-        st.markdown(f'<div style="background-color:green;color:white;padding:0.5rem;">Ollama is available.</div>', unsafe_allow_html=True)
         status = False
         return status
     except ollama.ResponseError as e:
-        st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
         logger.error(f"check_ollama_status(): {e}")
         return status
     except Exception as e:
-        st.markdown('<div style="background-color:red;color:white;padding:0.5rem;">Ollama is unavailable.</div>', unsafe_allow_html=True)
         logger.error(f"check_ollama_status(): {e}")
         return status
 
 def check_model_status(model: str) -> str:
     """
-    Checks the availability of the requested model on the Ollama server.
-    If the requested model is available on the server, then return the same
-    If it is not available, return the first model name on the list, and use that one for the session
-    :param model: string containing requested model name
-    :return: string: the model name to be used for this session
+    Slogan: Check and update the model based on availability from the Ollama server.
+    
+    Parameters:
+        model (str): The user-requested model name.
+        
+    Returns:
+        str: The model name to be used for the session, or an empty string if no model is available.
     """
     try:
-        response: ollama.ListResponse = ollama.list()
-        model_names = [m['name'] for m in response['models']]  # Extract model names
+        response: ListResponse = ollama.list()
+        
+        # Ensure the response contains the 'models' key.
+        if 'models' not in response:
+            logger.error("check_model_status(): 'models' key not found in response")
+            return ""
+        
+        # Extract model names from each Model object using the 'model' attribute.
+        model_objects = response.get('models', [])
+        model_names = [m.model for m in model_objects if hasattr(m, 'model')]
         logger.info(f"check_model_status(): Available model(s): {model_names}")
-        if model not in model_names:
-            if model_names:  # Check if the list is not empty
+        
+        if model_names:
+            if model not in model_names:
                 logger.warning(f"check_model_status(): User specified model {model} not available")
                 logger.warning(f"check_model_status(): Using {model_names[0]} for this session")
                 model = model_names[0]
+        else:
+            logger.error("check_model_status(): No model is available on Ollama server")
+            model = ""  # Return empty string if no models are available.
+            
         return model
     except ollama.ResponseError as e:
         logger.error(f"check_model_status(): Error from Ollama: {e}")
@@ -127,6 +153,7 @@ def query_ollama(config: dict, prompt: str, st: object) -> None:
     accumulated_text = ""
     token_count = 0
     start_time = time.time()
+    logger.info(f"query_ollama(): starting inference with model {config['model']}...")
     try:
         for part in ollama.chat(model=config['model'], messages=messages, stream=True):
             if token_count == 0:
@@ -163,9 +190,19 @@ def front_end(config: dict) -> None:
     st.title('Grammar and Spelling Correction')
 
     # Check and display the Ollama service status
+    st_error_msg = ""
     ollama_disabled_state = check_ollama_status()
     if not ollama_disabled_state:  # If ollama_disabled_state is False, then check model
         config['model'] = check_model_status(config['model'])
+        if config['model'] is None or config['model'] == "":
+            ollama_disabled_state = True
+            st_error_msg = "There is no available model on Ollama server"
+    else:
+        st_error_msg = "The Ollama server is not reachable"
+
+    set_ollama_status_banner(st, ollama_disabled_state)
+    if st_error_msg != "":
+        st.error(st_error_msg)
 
     st.markdown('<style>div.row-widget.stTextArea { padding-top: 0.5rem; }</style>', unsafe_allow_html=True)
     text = st.text_area("Enter text to check:", height=150, disabled=ollama_disabled_state)
