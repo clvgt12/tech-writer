@@ -95,7 +95,7 @@ def check_model_status(model: str) -> str:
     """
     try:
         response: ollama.ListResponse = ollama.list()
-        model_names = [m.model for m in response.models]  # Extract model names
+        model_names = [m['name'] for m in response['models']]  # Extract model names
         logger.info(f"check_model_status(): Available model(s): {model_names}")
         if model not in model_names:
             if model_names:  # Check if the list is not empty
