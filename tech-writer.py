@@ -108,15 +108,26 @@ def check_model_status(model: str) -> str:
     """
     try:
         response: ListResponse = ollama.list()
+        logger.info(f"check_model_status(): Full response from Ollama: {response}")
         
         # Ensure the response contains the 'models' key.
         if 'models' not in response:
             logger.error("check_model_status(): 'models' key not found in response")
             return ""
         
-        # Extract model names from each Model object using the 'model' attribute.
-        model_objects = response.get('models', [])
-        model_names = [m.model for m in model_objects if hasattr(m, 'model')]
+        # Process each model entry, handling both dicts and Model objects
+        model_list = response.get('models', [])
+        model_names = []
+        for m in model_list:
+            model_name = None
+            if isinstance(m, dict):
+                # Prefer the 'model' key, but fallback to 'name'
+                model_name = m.get('model') or m.get('name')
+            elif hasattr(m, 'model'):
+                model_name = m.model
+            if model_name:
+                model_names.append(model_name)
+
         logger.info(f"check_model_status(): Available model(s): {model_names}")
         
         if model_names:
