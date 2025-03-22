@@ -108,44 +108,43 @@ def check_model_status(model: str) -> str:
     """
     try:
         response: ListResponse = ollama.list()
-        logger.info(f"check_model_status(): Full response from Ollama: {response}")
-        
-        # Ensure the response contains the 'models' key.
-        if 'models' not in response:
-            logger.error("check_model_status(): 'models' key not found in response")
-            return ""
-        
-        # Process each model entry, handling both dicts and Model objects
-        model_list = response.get('models', [])
-        model_names = []
-        for m in model_list:
-            model_name = None
-            if isinstance(m, dict):
-                # Prefer the 'model' key, but fallback to 'name'
-                model_name = m.get('model') or m.get('name')
-            elif hasattr(m, 'model'):
-                model_name = m.model
-            if model_name:
-                model_names.append(model_name)
-
-        logger.info(f"check_model_status(): Available model(s): {model_names}")
-        
-        if model_names:
-            if model not in model_names:
-                logger.warning(f"check_model_status(): User specified model {model} not available")
-                logger.warning(f"check_model_status(): Using {model_names[0]} for this session")
-                model = model_names[0]
-        else:
-            logger.error("check_model_status(): No model is available on Ollama server")
-            model = ""  # Return empty string if no models are available.
-            
-        return model
+        # logger.info(f"check_model_status(): Full response from Ollama: {response}")
     except ollama.ResponseError as e:
         logger.error(f"check_model_status(): Error from Ollama: {e}")
-        return model
+        return None
     except Exception as e:
         logger.error(f"check_model_status(): An unexpected error occurred: {e}")
-        return model
+        return None
+        
+    # Ensure the response contains the 'models' key.
+    if 'models' not in response:
+        logger.error("check_model_status(): 'models' key not found in response")
+        return None
+    
+    # Process each model entry, handling both dicts and Model objects
+    model_list = response.get('models', [])
+    model_names = []
+    for m in model_list:
+        model_name = None
+        if isinstance(m, dict):
+            # Prefer the 'model' key, but fallback to 'name'
+            model_name = m.get('model') or m.get('name')
+        elif hasattr(m, 'model'):
+            model_name = m.model
+        if model_name:
+            model_names.append(model_name)
+
+    logger.info(f"check_model_status(): Available model(s): {model_names}")
+
+    if model_names:
+        if model not in model_names:
+            logger.warning(f"check_model_status(): User specified model {model} not available")
+            model = model_names[0]
+    else:
+        logger.error("check_model_status(): No model is available on Ollama server")
+        return None   # Return None if no models are available.
+    logger.info(f"check_model_status(): Using {model} for this session")
+    return model
 
 def query_ollama(config: dict, prompt: str, st: object) -> None:
     """
