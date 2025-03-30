@@ -167,22 +167,22 @@ def query_ollama(config: dict, prompt: str, st: object) -> None:
     try:
         for part in ollama.chat(model=config['model'], messages=messages, stream=True):
             if token_count == 0:
-                ramp_up_time = time.time() - start_time
-                if ramp_up_time > 0:
-                    logger.info(f"query_ollama(): ramp up time = {ramp_up_time:.2f} seconds")
+                gpu_decode_time = time.time() - start_time
+                if gpu_decode_time > 0:
+                    logger.info(f"query_ollama(): GPU Decode Time = {gpu_decode_time:.2f} seconds")
                 else:
-                    logger.warning("query_ollama(): ramp up time is zero.")
+                    logger.warning("query_ollama(): GPU Decode Time is zero.")
             p = part['message']['content']
             if p and p != "":
                 accumulated_text += p
                 output_placeholder.markdown(accumulated_text)
                 token_count += 1  # Increment token count
         elapsed_time = time.time() - start_time
-        if elapsed_time > 0:
-            tokens_per_second = token_count / elapsed_time
-            logger.info(f"query_ollama(): tokens per second = {tokens_per_second:.2f}")
-        else:
-            logger.warning("query_ollama(): Elapsed time is zero.")
+        if token_count > 0:
+            time_per_output_token = elapsed_time / token_count
+            logger.info(f"query_ollama(): Time Per Output Token (TPOT) = {time_per_output_token:.4f}")
+        else
+            logger.warning("query_ollama(): Token Count is zero.")
     except ollama.ResponseError as e:
         logger.error(f"query_ollama(): {e}")
     except Exception as e:
