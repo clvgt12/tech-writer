@@ -181,7 +181,7 @@ def query_ollama(config: dict, prompt: str, st: object) -> None:
         if token_count > 0:
             time_per_output_token = elapsed_time / token_count
             logger.info(f"query_ollama(): Time Per Output Token (TPOT) = {time_per_output_token:.4f}")
-        else
+        else:
             logger.warning("query_ollama(): Token Count is zero.")
     except ollama.ResponseError as e:
         logger.error(f"query_ollama(): {e}")
